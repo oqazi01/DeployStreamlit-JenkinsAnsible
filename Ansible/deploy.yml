@@ -1,0 +1,28 @@
+---
+- hosts: webserver
+  become: true
+
+  tasks:
+    - name: Update and install required packages
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+        state: latest
+      loop:
+        - python3
+        - python3-pip
+        - streamlit
+
+    - name: Pull the latest Streamlit app code
+      git:
+        repo: 'https://github.com/your-org/your-streamlit-app.git'
+        dest: /opt/streamlit-app
+        version: main
+
+    - name: Install Python dependencies
+      pip:
+        requirements: /opt/streamlit-app/streamlit/requirements.txt
+
+    - name: Run Streamlit app
+      shell: |
+        nohup streamlit run /opt/streamlit-app/streamli/app.py --server.port 8501 &
