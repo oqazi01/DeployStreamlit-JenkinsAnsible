@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+
+    environment {
+        GIT_REPO_URL = 'https:/https://github.com/oqazi01/DeployStreamlit-JenkinsAnsible.git' 
+        BRANCH = 'main'  // Replace with the branch name if needed
+        ANSIBLE_PLAYBOOK = 'Ansible/deploy.yml'  // Ansible playbook for deployment
+        INVENTORY_FILE = 'Ansible/hosts'  // Ansible inventory file
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                // Checkout code from the GitHub repository
+                git branch: "${BRANCH}", url: "${GIT_REPO_URL}"
+            }
+        }
+
+        stage('Run Ansible Playbook') {
+            steps {
+                // Run the Ansible playbook to deploy the Streamlit app to EC2
+                ansiblePlaybook(
+                    playbook: "${ANSIBLE_PLAYBOOK}",
+                    inventory: "${INVENTORY_FILE}",
+                    extras: "--key-file /path/to/your/private-key.pem" // Make sure the private key path is accessible
+                )
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Deployment failed!'
+        }
+    }
+}
